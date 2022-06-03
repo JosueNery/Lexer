@@ -3,14 +3,15 @@ import sys
 from ts import TS
 from tag import Tag
 from token import Token
- 
+
+
 class Lexer():
-   
+
    '''
    Classe que representa o Lexer:
-   
+
    [1] Voce devera se preocupar quando incremetar as linhas e colunas,
-   assim como quando decrementar ou reinicia-las. Lembre-se, ambas 
+   assim como quando decrementar ou reinicia-las. Lembre-se, ambas
    comecam em 1.
    [2] Toda vez que voce encontrar um lexema completo, voce deve retornar
    um objeto Token(Tag, "lexema", linha, coluna). Cuidado com as
@@ -18,13 +19,13 @@ class Lexer():
    voce devera fazer somente quando encontrar um Identificador.
    [3] Se o caractere lido nao casar com nenhum caractere esperado,
    apresentar a mensagem de erro na linha e coluna correspondente.
-   Obs.: lembre-se de usar o metodo retornaPonteiro() quando necessario. 
+   Obs.: lembre-se de usar o metodo retornaPonteiro() quando necessario.
          lembre-se de usar o metodo sinalizaErroLexico() para mostrar
          a ocorrencia de um erro lexico.
    '''
 
    def __init__(self, input_file):
-     
+
       try:
          self.input_file = open(input_file, 'rb')
          self.lookahead = 0
@@ -57,7 +58,6 @@ class Lexer():
       estado = 1
       lexema = ""
       c = '\u0000'
-      i = 0 
 
       while(True):
          self.lookahead = self.input_file.read(1)
@@ -69,8 +69,7 @@ class Lexer():
             elif(c == ' ' or c == '\t' or c == '\n'):
                estado = 1
             elif(c == ':'):
-               lexema+=c
-               estado = 2
+               return Token(Tag.SMB_DOIS_PONTOS, ":", self.n_line, self.n_column)
             elif(c == ';'):
                return Token(Tag.SMB_PONTO_VIRGULA, ";", self.n_line, self.n_column)
             elif(c == '-'):
@@ -84,32 +83,29 @@ class Lexer():
             elif(c == '/'):
               return Token(Tag.OP_DIVISAO, "/", self.n_line, self.n_column)
             elif(c == '{'):
-              return Token(Tag.SMB_ABRE_CHAVES, "{", self.n_line, self.n_column)
+              estado = 2
             elif(c == '}'):
                return Token(Tag.SMB_FECHA_CHAVES, "}", self.n_line, self.n_column)
             elif(c.isdigit()):
                lexema += c
                estado = 6
-
             elif(c.isalpha()):
                lexema += c
                estado = 7
             elif(c == '"'):
-              estado = 8
+               estado = 8
             else:
                self.sinalizaErroLexico("Caractere invalido [" + c + "] na linha " +
                str(self.n_line) + " e coluna " + str(self.n_column))
                return None
-           
 
          elif(estado == 2):
-                  if(c.isdigit()):
-                     self.sinalizaErroLexico("Caractere invalido [" + c + "] na linha " +
-                     str(self.n_line) + " e coluna " + str(self.n_column) + " variáveis não devem começar com numeros")
-                     return None
-                  else:
-                      self.retornaPonteiro()
-                      return Token(Tag.SMB_DOIS_PONTOS, ':', self.n_line, self.n_column)
+            if(c == '}'):
+               estado = 1
+            elif(c == '\n'):
+               self.sinalizaErroLexico("Caractere invalido [" + c + "] na linha " +
+               str(self.n_line) + " e coluna " + str(self.n_column))
+               return None
 
          elif(estado == 6):
             if(c.isdigit()):
@@ -125,8 +121,11 @@ class Lexer():
                self.retornaPonteiro()
                token = self.ts.getToken(lexema)
                if(token is None):
-                  token = Token(Tag.ID, lexema, self.n_line, self.n_column)
+                  token = Token(Tag.ID, lexema, self.n_line, self.n_column - 1)
                   self.ts.addToken(lexema, token)
+               else:
+                  token.setLinha(self.n_line)
+                  token.setColuna(self.n_column - 1)
 
                return token
 
@@ -136,4 +135,10 @@ class Lexer():
             else:
                return Token(Tag.LITERAL, lexema, self.n_line, self.n_column)
          # fim if's de estados
+
+         if(c == '\n'):
+            self.n_line = self.n_line + 1
+            self.n_column = 1
+         else:
+            self.n_column = self.n_column + 1
       # fim while
