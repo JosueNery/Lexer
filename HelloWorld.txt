@@ -1,5 +1,6 @@
 program "HelloMiniLogo"
-:teste;
+:9teste;
+{asdfasd}
 dasda
 begin
 dasd
