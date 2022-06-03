@@ -84,8 +84,6 @@ class Lexer():
               return Token(Tag.OP_DIVISAO, "/", self.n_line, self.n_column)
             elif(c == '{'):
               estado = 2
-            elif(c == '}'):
-               return Token(Tag.SMB_FECHA_CHAVES, "}", self.n_line, self.n_column)
             elif(c.isdigit()):
                lexema += c
                estado = 6
