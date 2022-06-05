@@ -43,13 +43,12 @@ class Tag(Enum):
    OP_MAIS= 12
    OP_VEZES = 13
    OP_DIVISAO = 14
+   
    # Simbolos
    SMB_ABRE_CHAVES = 15
    SMB_FECHA_CHAVES = 16
    SMB_DOIS_PONTOS = 17
    SMB_PONTO_VIRGULA = 18
-   SMB_ABRE_ASP = 19
-   SMB_FECHA_ASP = 20
    
    # Identificador
    ID = 21
