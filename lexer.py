@@ -31,6 +31,7 @@ class Lexer():
          self.lookahead = 0
          self.n_line = 1
          self.n_column = 1
+         self.n_erros = 0
          self.ts = TS()
       except IOError:
          print('Erro de abertura do arquivo. Encerrando.')
@@ -52,7 +53,7 @@ class Lexer():
 
    def printTS(self):
       self.ts.printTS()
-
+      
    def proxToken(self):
       ''' simula um AFD '''
       estado = 1
@@ -80,8 +81,6 @@ class Lexer():
               return Token(Tag.OP_VEZES, "*", self.n_line, self.n_column)
             elif(c == '/'):
               return Token(Tag.OP_DIVISAO, "/", self.n_line, self.n_column)
-            elif(c == '/'):
-              return Token(Tag.OP_DIVISAO, "/", self.n_line, self.n_column)
             elif(c == '{'):
               estado = 2
             elif(c.isdigit()):
@@ -101,10 +100,12 @@ class Lexer():
             if(c == '}'):
                estado = 1
             elif(c == '\n'):
-               self.sinalizaErroLexico("Caractere invalido [" + c + "] na linha " +
+               self.n_erros = self.n_erros + 1
+               self.sinalizaErroLexico("Comentário inválido: linha " +
                str(self.n_line) + " e coluna " + str(self.n_column))
-               return None
-
+               if(self.n_erros == 6):
+                  return None
+               
          elif(estado == 6):
             if(c.isdigit()):
                lexema += c
@@ -119,16 +120,22 @@ class Lexer():
                self.retornaPonteiro()
                token = self.ts.getToken(lexema)
                if(token is None):
-                  token = Token(Tag.ID, lexema, self.n_line, self.n_column - 1)
+                  token = Token(Tag.ID, lexema, self.n_line, self.n_column)
                   self.ts.addToken(lexema, token)
                else:
                   token.setLinha(self.n_line)
-                  token.setColuna(self.n_column - 1)
+                  token.setColuna(self.n_column)
 
                return token
 
          elif(estado == 8):
             if(c != '"'):
+               if( c == '\n'):
+                  self.n_erros = self.n_erros + 1
+                  self.sinalizaErroLexico("Erro ao formar um Literal (espera um \"): linha " +
+                  str(self.n_line) + " e coluna " + str(self.n_column))
+               elif(self.n_erros == 6):
+                  return None
                lexema += c
             else:
                return Token(Tag.LITERAL, lexema, self.n_line, self.n_column)
