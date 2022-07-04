@@ -21,6 +21,13 @@ class TS:
       token = self.ts.get(lexema)
       return token
 
+   def setTipo(self, tipo):
+      self.setTipo(tipo)
+  
+   def getTipo(self):
+      tipo = self.getTipo()
+      return tipo
+
    def addToken(self, lexema, token):
       self.ts[lexema] = token
 

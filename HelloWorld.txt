@@ -1,25 +1,22 @@
 
 program "HelloMiniLogo"
 
-    :9teste;
-        {asdfasd
-        
-        
-        
-        
-        }
+    :teste;
+    :var;
+    
+        {asdfasd}
       
-d  asda
-egin
- dasd
+begin
+ 
     print "movendo para frente";
-    :var 10;
+    :teste 10;
+    :var 44;
     forward :var;
                                         print "iniciando loop";
     repeat 3 do
                                             begin
     turn 90 degrees;
-                                                    forward var
+                                                    forward :var
         end;
 print "fim"
     end

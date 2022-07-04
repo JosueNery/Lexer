@@ -1,10 +1,6 @@
 import sys
 import copy
 
-from tag import Tag
-from token import Token
-from lexer import Lexer
-
 '''
 [TODO-OPC-1]: 
 tratar retorno 'None' do Lexer que esta sem Modo Panico
@@ -47,28 +43,35 @@ class Parser():
       if(self.eat(Tag.KW_PROGRAM)):
          if(not self.eat(Tag.LITERAL)):
             self.sinalizaErroSintatico("Esperado \"um LITERAL\", encontrado " + "\"" + self.token.getLexema() + "\"")
+            sys.exit(0)
          self.Decl()
          self.Block()
          if(self.token.getNome() != Tag.EOF):
-            self.sinalizaErroSintatico("Esperado \" \"; encontrado " + "\"" + self.token.getLexema() + "\"")
+            self.sinalizaErroSintatico("Esperado \"Fim do arquivo \"; encontrado " + "\"" + self.token.getLexema() + "\"")
       
 
    def Decl(self):
       if(self.eat(Tag.SMB_DOIS_PONTOS)):
          # ‘:’id ‘;’ Decl | ε
+         aux = self.token
          if(not self.eat(Tag.ID)):
-            self.sinalizaErroSintatico("Esperado \"ID\", encontrado " + "\"" + self.token.getLexema() + "\"")
+            self.sinalizaErroSintatico("Esperado \"ID\", encontrado " + "\"" + self.token.getLexema() + "\""+" Decl não deve começar com um numeral")
+            sys.exit(0)
+         TS.setTipo(aux, 'NUM')
          if(not self.eat(Tag.SMB_PONTO_VIRGULA)):
             self.sinalizaErroSintatico("Esperado \"';'\", encontrado " + "\"" + self.token.getLexema() + "\"")
+            sys.exit(0)
          self.Decl()
    
    def Block(self):
       # ‘begin’ StatementList ‘end’
       if(not self.eat(Tag.KW_BEGIN)):
-         self.sinalizaErroSintatico("Esperado \"'begin'\", encontrado " + "\"" + self.token.getLexema() + "\"")
+         self.sinalizaErroSintatico("Esperado \"'begin'\", encontrado " + "\"" + self.token.getLexema() + "\""+ " bloco de codigo deve ser iniciado com begin")
+         sys.exit(0)
       self.StatementList()
       if(not self.eat(Tag.KW_END)):
          self.sinalizaErroSintatico("Esperado \"'end'\", encontrado " + "\"" + self.token.getLexema() + "\"")
+         sys.exit(0)
       
    def StatementList(self):
       # Statement StatementList’
@@ -85,16 +88,19 @@ class Parser():
          self.Term()
          if(not self.eat(Tag.KW_DEGREES)):
             self.sinalizaErroSintatico("Esperado \"'degrees'\", encontrado " + "\"" + self.token.getLexema() + "\"")
+            sys.exit(0)
       elif(self.eat(Tag.KW_FORWARD)):
          self.Term()
       elif(self.eat(Tag.KW_REPEAT)):
          self.Term()
          if(not self.eat(Tag.KW_DO)):
             self.sinalizaErroSintatico("Esperado \"'do'\", encontrado " + "\"" + self.token.getLexema() + "\"")
+            sys.exit(0)
          self.Block()
       elif(self.eat(Tag.KW_PRINT)):
         if(not self.eat(Tag.LITERAL)):
             self.sinalizaErroSintatico("Esperado \"LITERAL\", encontrado " + "\"" + self.token.getLexema() + "\"")
+            sys.exit(0)
       elif(self.eat(Tag.SMB_DOIS_PONTOS)):
          self.AssignmentStatement()
       elif(self.eat(Tag.KW_IF)):
@@ -107,8 +113,13 @@ class Parser():
       
    def AssignmentStatement(self):
       # ‘:’id Expr
+      aux = self.token
       if(not self.eat(Tag.ID)):
          self.sinalizaErroSintatico("Esperado \"ID\", encontrado " + "\"" + self.token.getLexema() + "\"")
+         sys.exit(0)
+      if(TS.getTipo(aux) != 'NUM'):
+         self.sinalizaErroSintatico("ID não declarado" + "\"" + self.token.getLexema() + "\"")
+         sys.exit(0)
       self.Expr()
 
    def IfStatement(self):
@@ -116,6 +127,7 @@ class Parser():
       self.Expr()
       if(not self.eat(Tag.KW_DO)):
          self.sinalizaErroSintatico("Esperado \"DO\", encontrado " + "\"" + self.token.getLexema() + "\"")
+         sys.exit(0)
       self.Block()  
          
    def Expr(self):
@@ -149,6 +161,11 @@ class Parser():
        if(not self.eat(Tag.NUM)):
           if(not self.eat(Tag.SMB_DOIS_PONTOS)):
             self.sinalizaErroSintatico("Esperado \":\", encontrado "  + "\"" + self.token.getLexema() + "\"")
+            sys.exit(0)
+          aux = self.token
           if(not self.eat(Tag.ID)):
             self.sinalizaErroSintatico("Esperado \"num, id\", encontrado "  + "\"" + self.token.getLexema() + "\"")
-          
+            sys.exit(0)
+          if(TS.getTipo(aux) != 'NUM'):
+            self.sinalizaErroSintatico("ID não declarado" + "\"" + self.token.getLexema() + "\"")
+            sys.exit(0)
